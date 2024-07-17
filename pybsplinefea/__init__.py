@@ -9,6 +9,7 @@ from .base_algos import *
 from .benchmarks import *
 from .bspline_mse import BSplineMSEFitness
 from .bsplinefea import *
+from .utils import *
 
 __all__ = [
     "__version__",
