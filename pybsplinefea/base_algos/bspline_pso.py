@@ -19,13 +19,13 @@ class BSplinePSO(PSO):
         if not parallel:
             for pidx in range(self.pop_size):
                 curr_eval = self.func(self.pop[pidx, :])
-                self.fitness_functions += 1
+                self.nfitness_evals += 1
                 self.pop_eval[pidx] = curr_eval
         else:
             self.pop_eval = parallel_eval(
                 self.func, self.pop, processes=processes, chunksize=chunksize
             )
-            self.fitness_functions += self.pop_size
+            self.nfitness_evals += self.pop_size
 
     def init_pop(self):
         """

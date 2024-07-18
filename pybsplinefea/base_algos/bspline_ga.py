@@ -15,6 +15,19 @@ class BSplineGA(GA):
         pop.sort()
         return pop
 
+    def _eval_pop(self, parallel=False, processes=4, chunksize=4):
+        self.pop.sort()
+        if not parallel:
+            for pidx in range(self.pop_size):
+                curr_eval = self.func(self.pop[pidx, :])
+                self.nfitness_evals += 1
+                self.pop_eval[pidx] = curr_eval
+        else:
+            self.pop_eval = parallel_eval(
+                self.func, self.pop, processes=processes, chunksize=chunksize
+            )
+            self.nfitness_evals += self.pop_size
+
     def bounds_check(self, children):
         """
         Ensure that the particles don't move outside the domain of our function by projecting
@@ -45,12 +58,12 @@ class BSplineGA(GA):
         children.sort()
         if not parallel:
             for child in children:
-                child.sort()  # NOTE: this seems unneccessary. checkme
+                #child.sort()  # NOTE: this seems unneccessary. checkme
                 self.pop_eval = np.concatenate((self.pop_eval, [self.func(child)]))
-                self.fitness_functions += 1
+                self.nfitness_evals += 1
                 self.pop = np.concatenate((self.pop, [child]))
         else:
             child_evals = parallel_eval(self.func, children, processes, chunksize)
             self.pop_eval = np.concatenate((self.pop_eval, child_evals))
-            self.fitness_functions += children.shape[0]
+            self.nfitness_evals += children.shape[0]
             self.pop = np.concatenate((self.pop, children))

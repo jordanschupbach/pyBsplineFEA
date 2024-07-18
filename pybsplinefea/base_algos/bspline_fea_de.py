@@ -6,49 +6,50 @@ from pybsplinefea.base_algos import BSplineDE
 
 
 class BSplineFeaDE(BSplineDE, FeaDE):
-    def __init__(
-        self,
-        function,
-        domain,
-        generations=100,
-        pop_size=20,
-        mutation_factor=0.5,
-        crossover_rate=0.9,
-        processes=4,
-        chunksize=4,
-        fitness_terminate=False,
-    ):
-        """
-        @param function: the objective function to be minimized.
-        @param domain: the domain on which we explore the function stored as a (dim,2) matrix,
-        where dim is the number of dimensions we evaluate the function over.
-        @param generations: the number of generations run before the algorithm terminates.
-        @param pop_size: the number of individuals in the population.
-        @param mutation_factor: the scalar factor used in the mutation step.
-        @param crossover_rate: the probability of taking a mutated value during the crossover step.
-        """
-        self.fitness_terminate = fitness_terminate
-        self.generations = generations
-        self.pop_size = pop_size
-        self.func = function
-        self.domain = domain
-        self.processes = processes
-        self.chunksize = chunksize
-        self.pop = self._init_pop()
-        self.nfitness_evals = self.pop_size
-        self.mutation_factor = mutation_factor
-        self.crossover_rate = crossover_rate
-        self.mutant_pop = np.zeros((self.pop_size, self.domain.shape[0]))
-        self.ngenerations = 0
-        self.average_pop_variance = []
-        self.average_pop_eval = []
-        self.fitness_list = []
-        self.best_answers = []
-        self.pop_eval = parallel_eval(
-            self.func, self.pop, processes=self.processes, chunksize=self.chunksize
-        )
-        self.best_eval = np.min(self.pop_eval)
-        self.best_solution = np.copy(self.pop[np.argmin(self.pop_eval), :])
+
+    #def __init__(
+    #    self,
+    #    function,
+    #    domain,
+    #    generations=100,
+    #    pop_size=20,
+    #    mutation_factor=0.5,
+    #    crossover_rate=0.9,
+    #    processes=4,
+    #    chunksize=4,
+    #    fitness_terminate=False,
+    #):
+    #    """
+    #    @param function: the objective function to be minimized.
+    #    @param domain: the domain on which we explore the function stored as a (dim,2) matrix,
+    #    where dim is the number of dimensions we evaluate the function over.
+    #    @param generations: the number of generations run before the algorithm terminates.
+    #    @param pop_size: the number of individuals in the population.
+    #    @param mutation_factor: the scalar factor used in the mutation step.
+    #    @param crossover_rate: the probability of taking a mutated value during the crossover step.
+    #    """
+    #    self.fitness_terminate = fitness_terminate
+    #    self.generations = generations
+    #    self.pop_size = pop_size
+    #    self.func = function
+    #    self.domain = domain
+    #    self.processes = processes
+    #    self.chunksize = chunksize
+    #    self.pop = self._init_pop()
+    #    self.nfitness_evals = self.pop_size
+    #    self.mutation_factor = mutation_factor
+    #    self.crossover_rate = crossover_rate
+    #    self.mutant_pop = np.zeros((self.pop_size, self.domain.shape[0]))
+    #    self.ngenerations = 0
+    #    self.average_pop_variance = []
+    #    self.average_pop_eval = []
+    #    self.fitness_list = []
+    #    self.best_answers = []
+    #    self.pop_eval = parallel_eval(
+    #        self.func, self.pop, processes=self.processes, chunksize=self.chunksize
+    #    )
+    #    self.best_eval = np.min(self.pop_eval)
+    #    self.best_solution = np.copy(self.pop[np.argmin(self.pop_eval), :])
 
     def _init_pop(self):
         """
@@ -126,19 +127,19 @@ class BSplineFeaDE(BSplineDE, FeaDE):
         self.best_solution = np.copy(self.pop[np.argmin(self.pop_eval), :])
         self.best_eval = np.min(self.pop_eval)
 
-    def run(self, progress=True, parallel=False, processes=4, chunksize=4):
-        """
-        Run the minimization algorithm.
-        """
-        self._initialize(parallel, processes, chunksize)
-        if self.fitness_terminate:
-            while self.fitness_functions < self.generations:
-                self.ngenerations += 1
-                self._mutate()
-                self._stay_in_domain()
-                self._crossover()
-                self._selection()
-                self._track_vals()
-        else:
-            super().run(progress, parallel, processes, chunksize)
-        return self.best_eval
+    #def run(self, progress=True, parallel=False, processes=4, chunksize=4):
+    #    """
+    #    Run the minimization algorithm.
+    #    """
+    #    self._initialize(parallel, processes, chunksize)
+    #    if self.fitness_terminate:
+    #        while self.nfitness_evals < self.generations:
+    #            self.ngenerations += 1
+    #            self._mutate()
+    #            self._stay_in_domain()
+    #            self._crossover()
+    #            self._selection()
+    #            self._track_vals()
+    #    else:
+    #        super().run(progress, parallel, processes, chunksize)
+    #    return self.best_eval

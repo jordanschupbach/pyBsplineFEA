@@ -2,9 +2,10 @@ import random
 
 import numpy as np
 from pyfea.fea.base_algos import FeaGA
+from pybsplinefea.base_algos.bspline_ga import BSplineGA
 
 
-class BSplineFeaGA(FeaGA):
+class BSplineFeaGA(BSplineGA, FeaGA):
     def init_pop(self):
         """
         Initialize random particles.

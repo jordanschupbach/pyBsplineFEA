@@ -13,6 +13,19 @@ class BSplineDE(DE):
         pop.sort()
         return pop
 
+    def _eval_pop(self, parallel=False, processes=4, chunksize=4):
+        self.pop.sort()
+        if not parallel:
+            for pidx in range(self.pop_size):
+                curr_eval = self.func(self.pop[pidx, :])
+                self.nfitness_evals += 1
+                self.pop_eval[pidx] = curr_eval
+        else:
+            self.pop_eval = parallel_eval(
+                self.func, self.pop, processes=processes, chunksize=chunksize
+            )
+            self.nfitness_evals += self.pop_size
+
     def stay_in_domain(self):
         """
         Ensure that the particles don't move outside the domain of our function by projecting

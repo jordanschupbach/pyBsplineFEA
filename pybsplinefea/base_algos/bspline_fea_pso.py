@@ -1,9 +1,10 @@
 import numpy as np
 from pyfea.base_algos import parallel_eval
 from pyfea.fea.base_algos import FeaPSO
+from pybsplinefea.base_algos.bspline_pso import BSplinePSO
 
 
-class BSplineFeaPSO(FeaPSO):
+class BSplineFeaPSO(BSplinePSO, FeaPSO):
     def _initialize(self, parallel=False, processes=4, chunksize=4):
         self.pop.sort()
         if parallel:
