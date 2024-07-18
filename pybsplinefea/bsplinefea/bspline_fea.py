@@ -1,4 +1,5 @@
 from copy import deepcopy
+from multiprocessing import Pool, Process, Queue
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -50,7 +51,7 @@ class BSplineFEA(FEA):
         area = self.domain[1] - lbound
         return lbound + area * np.random.random(size=(self.dim))
 
-    def run(self, progress=True):
+    def run(self, parallel=False, process_count=4, progress=True):
         """
         Algorithm 3 from the Strasser et al. paper, altered to sort the context
         vector on initialization.
@@ -58,20 +59,65 @@ class BSplineFEA(FEA):
         self.context_variable = self.init_full_global()
         self.context_variable.sort()
         self.subpop_domains = self.domain_evaluation()
-        subpopulations = self.initialize_subpops()
-        for _ in tqdm(range(self.iterations), disable=(not progress)):
-            self.niterations += 1
-            for subpop in subpopulations:
-                self.subpop_compute(subpop)
-            self.compete(subpopulations)
-            self.share(subpopulations)
-            if self.niterations % self.diagnostic_amount == 0:
-                self.update_plots(subpopulations)
-        return self.function(self.context_variable)
+        if parallel:
+            parallel_i = 0
+            subpopulations = {}
+            while parallel_i < len(self.factors):
+                processes = []
+                result_queue = Queue()
+                for _ in range(int(process_count)):
+                    p = Process(target=self.initialize_subpop, args=(parallel_i, result_queue))
+                    processes.append(p)
+                    p.start()
+                    parallel_i += 1
+                    if parallel_i >= (len(self.factors)):
+                        break
+                for p in processes:
+                    result = result_queue.get()
+                    subpopulations.update({result[0]: result[1]})
+                for p in processes:
+                    p.join()
+            for _ in range(self.iterations):
+                self.niterations += 1
+                parallel_i = 0
+                while parallel_i < len(subpopulations):
+                    processes = []
+                    result_queue = Queue()
+                    for _ in range(int(process_count)):
+                        p = Process(
+                            target=self.subpop_compute,
+                            args=(subpopulations[parallel_i], parallel_i, result_queue),
+                        )
+                        processes.append(p)
+                        p.start()
+                        parallel_i += 1
+                        if parallel_i >= len(subpopulations):
+                            break
+                    for p in processes:
+                        result = result_queue.get()
+                        subpopulations[result[0]] = result[1]
+                    for p in processes:
+                        p.join()
+                self.compete(subpopulations)
+                self.share(subpopulations)
+                if self.niterations % self.diagnostic_amount == 0:
+                    self.update_plots(subpopulations)
+        else:
+            subpopulations = self.initialize_subpops()
+            for _ in tqdm(range(self.iterations), disable=(not progress)):
+                self.niterations += 1
+                for subpop in subpopulations:
+                    self.subpop_compute(subpop)
+                self.compete(subpopulations)
+                self.share(subpopulations)
+                if self.niterations % self.diagnostic_amount == 0:
+                    self.update_plots(subpopulations)
 
-    def subpop_compute(self, subpop):
+    def subpop_compute(self, subpop, parallel_i=0, result_queue=None):
         subpop.base_reset()
         subpop.run(progress=False)
+        if result_queue is not None:
+            result_queue.put([parallel_i, subpop])
 
     def compete(self, subpopulations):
         """
@@ -132,17 +178,38 @@ class BSplineFEA(FEA):
             subpopulations[i].func.context = np.copy(self.context_variable)
             subpopulations[i].update_bests()
 
-    def initialize_subpops(self):
+    def initialize_subpops(self, i=0, result_queue=None):
         """
         Initializes some inheritor of FeaBaseAlgo to optimize over each factor.
         Slightly altered to call domain differently.
         @param subpop_domains: the domains from domain_restriction.
         """
         ret = []
-        for i, subpop in enumerate(self.factors):
-            fun = Function(context=self.context_variable, function=self.function, factor=subpop)
-            ret.append(self.base_algo.from_kwargs(fun, self.subpop_domains[i], self.base_algo_args))
+        if result_queue is None:
+            for i, subpop in enumerate(self.factors):
+                fun = Function(context=self.context_variable, function=self.function, factor=subpop)
+                ret.append(self.base_algo.from_kwargs(fun, self.subpop_domains[i], self.base_algo_args))
+        else:
+            fun = Function(
+                context=self.context_variable, function=self.function, factor=self.factors[i]
+            )
+            result_queue.put(
+                [i, self.base_algo.from_kwargs(fun, self.subpop_domains[i], self.base_algo_args)]  # type: ignore
+            )
         return ret
+
+    def initialize_subpop(self, i, result_queue):
+        """
+        Initializes some inheritor of FeaBaseAlgo to optimize over each factor.
+        Slightly altered to call domain differently.
+        @param subpop_domains: the domains from domain_restriction.
+        """
+        fun = Function(
+            context=self.context_variable, function=self.function, factor=self.factors[i]
+        )
+        result_queue.put(
+            [i, self.base_algo.from_kwargs(fun, self.subpop_domains[i], self.base_algo_args)]  # type: ignore
+        )
 
     def domain_evaluation(self):
         """
@@ -194,3 +261,4 @@ class BSplineFEA(FEA):
             f"FEA: {100 * self.part_fit_func_array[-1]/self.all_fit_funcs[-1]}% of fitness functions are partial"
         )
         fig.tight_layout()
+
