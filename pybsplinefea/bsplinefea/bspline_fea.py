@@ -248,12 +248,12 @@ class BSplineFEA(FEA):
         fig, (ax1, ax2) = plt.subplots(nrows=1, ncols=2)  # type: ignore
 
         ax1.plot(self.all_fit_funcs, self.solution_variance_in_total)
-        ax1.set_xlabel("# of fitness evaluations", fontsize=10)
+        ax1.set_xlabel("fitness evaluations", fontsize=10)
         ax1.set_ylabel("solution variance", fontsize=10)
         ax1.set_title("Population Diversity", fontsize=10)
 
         ax2.plot(self.all_fit_funcs, self.convergences)
-        ax2.set_xlabel("# of fitness evaluations", fontsize=10)
+        ax2.set_xlabel("fitness evaluations", fontsize=10)
         ax2.set_ylabel("MSE", fontsize=10)
         ax2.set_title("Solution Fitness", fontsize=10)
 
