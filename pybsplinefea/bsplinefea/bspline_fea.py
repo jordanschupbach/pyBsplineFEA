@@ -258,7 +258,7 @@ class BSplineFEA(FEA):
         ax2.set_title("Solution Fitness", fontsize=10)
 
         fig.suptitle(
-            f"FEA: {100 * self.part_fit_func_array[-1]/self.all_fit_funcs[-1]}% of fitness functions are partial"
+            f"FEA: {round(100 * self.part_fit_func_array[-1]/self.all_fit_funcs[-1], 2)}% of fitness functions are partial"
         )
         fig.tight_layout()
 
