@@ -57,13 +57,15 @@ class BSplineGA(GA):
         self._bounds_check(children)
         children.sort()
         if not parallel:
+            child_evals = []
             for child in children:
-                #child.sort()  # NOTE: this seems unneccessary. checkme
-                self.pop_eval = np.concatenate((self.pop_eval, [self.func(child)]))
+                child_evals.append(self.func(child))
                 self.nfitness_evals += 1
-                self.pop = np.concatenate((self.pop, [child]))
         else:
             child_evals = parallel_eval(self.func, children, processes, chunksize)
-            self.pop_eval = np.concatenate((self.pop_eval, child_evals))
             self.nfitness_evals += children.shape[0]
-            self.pop = np.concatenate((self.pop, children))
+        for i, child in enumerate(children):
+            index = np.argmax(self.pop_eval)
+            if self.pop_eval[index] > child_evals[i]:
+                self.pop_eval[index] = child_evals[i]
+                self.pop[index,:] = child
