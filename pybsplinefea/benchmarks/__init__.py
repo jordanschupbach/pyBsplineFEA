@@ -12,4 +12,7 @@ __all__ = [
     "discontinuity",
     "smooth_peak",
     "second_smooth_peak",
+    "heavi_sine",
+    "bumps",
+    "blocks",
 ]
