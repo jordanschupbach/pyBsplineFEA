@@ -108,6 +108,7 @@ class BSplineFEA(FEA):
                 if self.niterations % self.diagnostic_amount == 0:
                     self.update_plots(subpopulations)
                 if self.terminate_by_fitness and self.full_fit_func + part_fit_func >= self.iterations:
+                    print('done')
                     break
         else:
             subpopulations = self.initialize_subpops()
@@ -122,6 +123,7 @@ class BSplineFEA(FEA):
                 if self.niterations % self.diagnostic_amount == 0:
                     self.update_plots(subpopulations)
                 if self.terminate_by_fitness and self.full_fit_func + part_fit_func >= self.iterations:
+                    print('done')
                     break
 
     def subpop_compute(self, subpop, parallel_i=0, result_queue=None):
