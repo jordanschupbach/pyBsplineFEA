@@ -22,7 +22,7 @@ class BSplineFEA(FEA):
         domain,
         diagnostics_amount,
         terminate_by_fitness=False,
-        **kwargs=None,
+        **kwargs,
     ):
         """
         @param factors: list of lists, contains the dimensions that each factor of the architecture optimizes over.
