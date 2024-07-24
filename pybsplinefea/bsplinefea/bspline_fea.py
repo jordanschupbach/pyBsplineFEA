@@ -21,7 +21,8 @@ class BSplineFEA(FEA):
         base_algo,
         domain,
         diagnostics_amount,
-        **kwargs,
+        fitness_terminate=False,
+        **kwargs=None,
     ):
         """
         @param factors: list of lists, contains the dimensions that each factor of the architecture optimizes over.
@@ -32,7 +33,7 @@ class BSplineFEA(FEA):
         @param domain: the minimum and maximum possible values of our domain for any variable of the context vector. It should be a tuple of size 2.
         @param **kwargs: parameters for the base algorithm.
         """
-        super().__init__(factors, function, iterations, dim, base_algo, domain, **kwargs)
+        super().__init__(factors, function, iterations, dim, base_algo, domain, fitness_terminate, **kwargs)
         self.domain = domain
         self.diagnostic_amount = diagnostics_amount
         self.iterations = iterations
@@ -59,6 +60,7 @@ class BSplineFEA(FEA):
         self.context_variable = self.init_full_global()
         self.context_variable.sort()
         self.subpop_domains = self.domain_evaluation()
+        part_fit_func = 0
         if parallel:
             parallel_i = 0
             subpopulations = {}
@@ -80,6 +82,7 @@ class BSplineFEA(FEA):
             for _ in range(self.iterations):
                 self.niterations += 1
                 parallel_i = 0
+                part_fit_func = 0
                 while parallel_i < len(subpopulations):
                     processes = []
                     result_queue = Queue()
@@ -98,20 +101,28 @@ class BSplineFEA(FEA):
                         subpopulations[result[0]] = result[1]
                     for p in processes:
                         p.join()
+                for subpop in subpopulations:
+                    part_fit_func += subpop.nfitness_evals
                 self.compete(subpopulations)
                 self.share(subpopulations)
                 if self.niterations % self.diagnostic_amount == 0:
                     self.update_plots(subpopulations)
+                if self.fitness_terminate and self.full_fit_func + part_fit_func >= self.iterations:
+                    break
         else:
             subpopulations = self.initialize_subpops()
             for _ in tqdm(range(self.iterations), disable=(not progress)):
+                part_fit_func = 0
                 self.niterations += 1
                 for subpop in subpopulations:
                     self.subpop_compute(subpop)
+                    part_fit_func += subpop.nfitness_evals
                 self.compete(subpopulations)
                 self.share(subpopulations)
                 if self.niterations % self.diagnostic_amount == 0:
                     self.update_plots(subpopulations)
+                if self.fitness_terminate and self.full_fit_func + part_fit_func >= self.iterations:
+                    break
 
     def subpop_compute(self, subpop, parallel_i=0, result_queue=None):
         subpop.base_reset()
