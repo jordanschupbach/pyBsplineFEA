@@ -48,7 +48,7 @@ class BSplineFeaGA(BSplineGA, FeaGA):
         children.sort()
         for child in children:
             self.pop_eval = np.concatenate((self.pop_eval, [self.func(child)]))
-            self.fitness_functions += 1
+            self.nfitness_evals += 1
             self.pop = np.concatenate((self.pop, [child]))
 
     def update_bests(self):
@@ -80,4 +80,4 @@ class BSplineFeaGA(BSplineGA, FeaGA):
         self.reinitialize_population()
         self.pop.sort()
         self.pop_eval = [self.func(self.pop[i, :]) for i in range(self.pop_size)]
-        self.fitness_functions += self.pop_size
+        self.nfitness_evals += self.pop_size
