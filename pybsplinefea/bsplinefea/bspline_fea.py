@@ -101,7 +101,7 @@ class BSplineFEA(FEA):
                         subpopulations[result[0]] = result[1]
                     for p in processes:
                         p.join()
-                for i in len(subpopulations):
+                for i in range(len(subpopulations)):
                     part_fit_func += subpopulations[i].nfitness_evals
                 self.compete(subpopulations)
                 self.share(subpopulations)
