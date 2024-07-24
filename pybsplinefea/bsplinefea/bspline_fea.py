@@ -21,7 +21,7 @@ class BSplineFEA(FEA):
         base_algo,
         domain,
         diagnostics_amount,
-        fitness_terminate=False,
+        terminate_by_fitness=False,
         **kwargs=None,
     ):
         """
@@ -33,7 +33,7 @@ class BSplineFEA(FEA):
         @param domain: the minimum and maximum possible values of our domain for any variable of the context vector. It should be a tuple of size 2.
         @param **kwargs: parameters for the base algorithm.
         """
-        super().__init__(factors, function, iterations, dim, base_algo, domain, fitness_terminate, **kwargs)
+        super().__init__(factors, function, iterations, dim, base_algo, domain, terminate_by_fitness, **kwargs)
         self.domain = domain
         self.diagnostic_amount = diagnostics_amount
         self.iterations = iterations
@@ -107,7 +107,7 @@ class BSplineFEA(FEA):
                 self.share(subpopulations)
                 if self.niterations % self.diagnostic_amount == 0:
                     self.update_plots(subpopulations)
-                if self.fitness_terminate and self.full_fit_func + part_fit_func >= self.iterations:
+                if self.terminate_by_fitness and self.full_fit_func + part_fit_func >= self.iterations:
                     break
         else:
             subpopulations = self.initialize_subpops()
@@ -121,7 +121,7 @@ class BSplineFEA(FEA):
                 self.share(subpopulations)
                 if self.niterations % self.diagnostic_amount == 0:
                     self.update_plots(subpopulations)
-                if self.fitness_terminate and self.full_fit_func + part_fit_func >= self.iterations:
+                if self.terminate_by_fitness and self.full_fit_func + part_fit_func >= self.iterations:
                     break
 
     def subpop_compute(self, subpop, parallel_i=0, result_queue=None):
