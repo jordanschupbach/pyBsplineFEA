@@ -4,7 +4,7 @@ import math
 def big_spike(x):
     return 100 * np.exp(-abs(10 * x-5)) + (10 * x - 5)**5/500
 
-def mdoppler(x: np.ndarray, add_denom=0.45) -> np.ndarray:
+def mdoppler(x: np.ndarray, add_denom=0.3) -> np.ndarray:
     return np.sin(20 / (x + add_denom))
 
 def cliff(x):
