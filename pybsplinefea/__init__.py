@@ -7,7 +7,7 @@ __name__ = "pybsplinefea"
 from ._version import __version__
 from .base_algos import *
 from .benchmarks import *
-from .bspline_mse import BSplineMSEFitness
+from .bspline_mse import BSplineMSEFitness, CrossMSEFitness
 from .bsplinefea import *
 from .utils import *
 
@@ -17,6 +17,7 @@ __all__ = [
     "BSplineGA",
     "BSplineGA",
     "BSplineMSEFitness",
+    "CrossMSEFitness",
 ]
 
 
