@@ -4,22 +4,28 @@ import numpy as np
 
 
 def range_transform(x, a, b, minx, maxx):
-    return (b - a) / (maxx - minx) * x - minx + a
+    return (b - a) / (maxx - minx) * (x - minx) + a
+
 
 def big_spike(x):
     return 100 * np.exp(-abs(10 * x - 5)) + (10 * x - 5) ** 5 / 500
 
+
 def mbig_spike(x):
     return range_transform(big_spike(x), -1, 1, 0, 100)
+
 
 def mdoppler(x: np.ndarray, add_denom=0.3) -> np.ndarray:
     return np.sin(20 / (x + add_denom))
 
+
 def cliff(x):
     return 90 / (1 + np.exp(-100 * (x - 0.4)))
 
+
 def discontinuity(x):
     return np.where(x < 0.6, 1 / (0.01 + (x - 0.3) ** 2), 1 / (0.015 + (x - 0.65) ** 2))
+
 
 def smooth_peak(x):
     return np.sin(x) + (2 * np.e) ** (-30 * x**2)
@@ -36,6 +42,7 @@ def blocks(x):
     for i, constant in enumerate(constants):
         ret = np.where((x >= donoho[i]) & (x < donoho[i + 1]), constant, ret)
     return ret
+
 
 def mblocks(x):
     return range_transform(blocks(x), -1, 1, -6.8, 17.3)
@@ -62,8 +69,10 @@ def bumps(x):
         ret += heights[i] / (1 + ((x - donoho[i]) / widths[i]) ** 4)
     return ret
 
+
 def mbumps(x):
     return range_transform(bumps(x), -1, 1, 0.0, 50.13894136)
+
 
 def heavi_sine(x):
     ret = 10 * np.sin(x * (4 * np.pi))
@@ -71,5 +80,6 @@ def heavi_sine(x):
     ret = np.where(x >= 0.72, ret - 0.8, ret)
     return ret
 
+
 def mheavi_sine(x):
-    return range_transform(heavi_sine(x), -1., 1., -14.5, 10.)
+    return range_transform(heavi_sine(x), -1.0, 1.0, -14.5, 10.0)
