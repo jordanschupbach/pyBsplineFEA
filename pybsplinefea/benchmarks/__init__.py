@@ -8,11 +8,15 @@ from .benchmarks import *
 __all__ = [
     "mdoppler",
     "big_spike",
+    "mbig_spike",
     "cliff",
     "discontinuity",
     "smooth_peak",
     "second_smooth_peak",
     "heavi_sine",
+    "mheavi_sine",
     "bumps",
+    "mbumps",
     "blocks",
+    "mblocks",
 ]
